@@ -22,7 +22,7 @@ def get_blocks(min_point, max_point):
                 all_blocks += get_blocks(quadrant[0], quadrant[1])
             return all_blocks
         else:
-            return list(map(lambda x: {'lat': x['geometry']['y'], 'lng': x['geometry']['x'], 'OBJECTID': x['attributes']['OBJECTID'], 'PostalCode': x['attributes']['PostalCode'], 'BuildingGL': x['attributes']['BuildingGL']}, blocks['features']))
+            return list(map(lambda x: {'lat': x['geometry']['y'], 'lng': x['geometry']['x'], 'object_id': x['attributes']['OBJECTID'], 'postal_code': x['attributes']['PostalCode'], 'building_gl': x['attributes']['BuildingGL']}, blocks['features']))
 
 # Given a rectangle bounded by min_point (bottom left) and max_point (top right),
 # return a list of coordinates for 4 equally divided quadrants.
