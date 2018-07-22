@@ -5,7 +5,10 @@
 import time
 import urllib.request
 import xml.etree.ElementTree as ET
+# Run `pip3 install tenacity` to install https://github.com/jd/tenacity
+from tenacity import *
 
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, max=10))
 def get_lease_info(postal_code):
     time.sleep(0.3)
     request_url = "https://services2.hdb.gov.sg/webapp/BB14ALeaseInfo/BB14SGenerateLeaseInfoXML?postalCode=" + str(postal_code) + "&_=" + str(int(time.time() * 1000))
@@ -23,6 +26,7 @@ def get_lease_info(postal_code):
             return { 'postal_code': postal_code, 'lease_commenced_date': None, 'lease_remaining': None, 'lease_period': None }
 
 # Only useful with the get_blocks script as that returns the postal code with the Building GL.
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, max=10))
 def get_property_info(building_gl):
     time.sleep(0.3)
     request_url = "https://services2.hdb.gov.sg/webapp/BC16AWPropInfoXML/BC16SRetrievePropInfoXML?sysId=FI10&bldngGL=" + str(building_gl)
