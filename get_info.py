@@ -7,6 +7,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 def get_lease_info(postal_code):
+    time.sleep(0.3)
     request_url = "https://services2.hdb.gov.sg/webapp/BB14ALeaseInfo/BB14SGenerateLeaseInfoXML?postalCode=" + str(postal_code) + "&_=" + str(int(time.time() * 1000))
     with urllib.request.urlopen(request_url) as url:
         response = url.read().decode()
@@ -23,6 +24,7 @@ def get_lease_info(postal_code):
 
 # Only useful with the get_blocks script as that returns the postal code with the Building GL.
 def get_property_info(building_gl):
+    time.sleep(0.3)
     request_url = "https://services2.hdb.gov.sg/webapp/BC16AWPropInfoXML/BC16SRetrievePropInfoXML?sysId=FI10&bldngGL=" + str(building_gl)
     with urllib.request.urlopen(request_url) as url:
         response = url.read().decode()
