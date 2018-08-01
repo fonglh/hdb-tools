@@ -6,11 +6,17 @@ import csv
 import psycopg2
 import os
 
+# HDB gives the floor range as something like 07 to 09.
+def split_floors(floor_range):
+    return floor_range.split(' to ')
+
 # Assume database named hdb is already created and use peer authentication with the current user.
 conn = psycopg2.connect("dbname=hdb user=" + os.getlogin())
 cursor = conn.cursor()
 blocks_sql = "INSERT INTO blocks(postal_code, address, town_name, town_code, lease_commenced_date, lease_remaining, lease_period, building_gl) " \
              "VALUES (%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (postal_code) DO NOTHING"
+resale_sql = "INSERT INTO resale_transactions(postal_code, resale_price, floor_area, floor_min, floor_max, registration_date, model, flat_type, remaining_lease) " \
+             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (postal_code, registration_date, resale_price) DO NOTHING"
 
 #min_point = [1.31013, 103.86564]
 #max_point = [1.33566, 103.89676]
@@ -50,8 +56,6 @@ with open('block_info.csv', 'w') as csvfile:
         cursor.execute(blocks_sql, (block_info['postal_code'], block_info['address'], block_info['town_name'], block_info['town_code'],
                                     block_info['lease_commenced_date'], block_info['lease_remaining'], block_info['lease_period'], block_info['building_gl']))
     conn.commit()
-cursor.close()
-conn.close()
 
 with open('resale_transactions.csv', 'w') as csvfile:
     fieldnames = ['postal_code', 'flat_type', 'registration_date', 'block_number', 'floor_range', 'resale_price', 'floor_area', 'lease_commencement_date', 'remaining_lease', 'model']
@@ -60,3 +64,9 @@ with open('resale_transactions.csv', 'w') as csvfile:
     for transaction in all_resale_transactions:
         print(transaction)
         resale_transactions_writer.writerow(transaction)
+        floors = split_floors(transaction['floor_range'])
+        cursor.execute(resale_sql, (transaction['postal_code'], transaction['resale_price'].replace(',', ''), transaction['floor_area'], floors[0], floors[1], "15 " + transaction['registration_date'], transaction['model'], transaction['flat_type'], transaction['remaining_lease']))
+    conn.commit()
+
+cursor.close()
+conn.close()
